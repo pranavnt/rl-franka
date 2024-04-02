@@ -3,7 +3,7 @@ import time
 import mujoco
 import mujoco.viewer
 
-model = mujoco.MjModel.from_xml_path("./mujoco_menagerie/franka_emika_panda/panda.xml")
+model = mujoco.MjModel.from_xml_path("./mujoco_mengaerie/franka_emika_panda/panda.xml")
 data = mujoco.MjData(model)
 
 mujoco.mj_step(model, data)

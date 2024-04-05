@@ -8,7 +8,7 @@ import torch.nn.functional as F
 model = mujoco.MjModel.from_xml_path("./mujoco_mengaerie/franka_emika_panda/scene.xml")
 data = mujoco.MjData(model)
 
-action_scale = 0.0001
+action_scale = 0.01
 
 class PolicyNetwork(nn.Module):
     def __init__(self, input_size, output_size):
@@ -32,13 +32,13 @@ def compute_returns(rewards):
 def calculate_reward(data):
     hand_pos = torch.tensor(data.body("hand").xpos)
     block_pos = torch.tensor(data.body("block").xpos)
-    return -1 * torch.sum((hand_pos - block_pos) ** 2)
+    return -1 * torch.sum((hand_pos - block_pos))
 
 policy = PolicyNetwork(input_size=13, output_size=14)
 optimizer = torch.optim.Adam(policy.parameters(), lr=0.01)
 
 num_episodes = 10
-num_steps_per_episode = 100
+num_steps_per_episode = 30000
 
 for episode in range(num_episodes):
     mujoco.mj_resetData(model, data)
@@ -81,9 +81,9 @@ for episode in range(num_episodes):
                 viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = int(data.time % 2)
             viewer.sync()
 
-            if curr_step % 10 == 0:
-                print(curr_step)
-                time.sleep(0.5)
+            if curr_step % 5000 == 0:
+                print(str(curr_step) + " " + str(reward))
+                print("hand pos: " + str(hand_pos) + " block pos: " + str(block_pos))
 
     returns = compute_returns(episode_rewards)
 
@@ -92,4 +92,3 @@ for episode in range(num_episodes):
     loss = loss.sum()
     loss.backward()
     optimizer.step()
-

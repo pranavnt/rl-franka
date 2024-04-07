@@ -6,22 +6,26 @@ class REINFORCE(BaseAlgorithm):
         self.optimizer = optimizer
         self.gamma = gamma
 
-    def train(self, env, policy, num_episodes):
+    def train(self, env, policy, num_episodes, num_steps):
         for episode in range(num_episodes):
             obs = env.reset()
             episode_rewards = []
             episode_logprobs = []
             done = False
-            while not done:
+
+            for step in range(num_steps):
                 action_probs = policy(obs)
                 action = torch.distributions.Categorical(action_probs).sample()
                 log_prob = torch.distributions.Categorical(action_probs).log_prob(action)
-                obs, reward, done, _ = env.step(action.item())
+                obs, reward, _, _ = env.step(action.item())
                 episode_rewards.append(reward)
                 episode_logprobs.append(log_prob)
 
-            returns = self._compute_returns(episode_rewards)
-            loss = self._compute_loss(episode_logprobs, returns)
+                if len(episode_rewards) % 100 == 0:
+                    print(f"Episode {episode}: Step {step}: Reward = {sum(episode_rewards):.2f}")
+            
+            returns = REINFORCE._compute_returns(episode_rewards)
+            loss = REINFORCE._compute_loss(episode_logprobs, returns)
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
@@ -40,13 +44,13 @@ class REINFORCE(BaseAlgorithm):
             total_rewards.append(episode_reward)
         return total_rewards
 
-    def _compute_returns(self, rewards):
+    def _compute_returns(rewards, gamma):
         returns = []
         R = 0
         for r in reversed(rewards):
-            R = r + self.gamma * R
+            R = r + gamma * R
             returns.insert(0, R)
         return torch.tensor(returns)
 
-    def _compute_loss(self, logprobs, returns):
+    def _compute_loss(logprobs, returns):
         return -torch.mean(torch.stack(logprobs) * returns)

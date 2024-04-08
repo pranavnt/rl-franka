@@ -96,6 +96,11 @@ def behavior_cloning_main(data_dir="./data"):
             optimizer.step()
         print(f"Epoch {epoch + 1} loss: {loss.item()}")
 
+def ppo_main():
+    env = MujocoEnv(model_path="./mujoco_mengaerie/franka_emika_panda/scene.xml", reward_func=distance_reward, render=True)
+
+    algo = PPO(optimizer=optimizer)
+
 if __name__ == "__main__":
     behavior_cloning_main()
 

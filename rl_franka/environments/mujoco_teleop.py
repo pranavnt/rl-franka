@@ -2,7 +2,7 @@ import mujoco
 import mujoco.viewer
 import torch
 import numpy as np
-import glfw
+import os
 from base_env import BaseEnv
 
 import numpy as np
@@ -102,6 +102,9 @@ class MujocoTeleopEnv(BaseEnv):
         self.collected_data = []
 
     def collect_data(self, dump_folder="./data"):
+        if not os.path.exists(dump_folder):
+            os.makedirs(dump_folder)
+
         data_point_num = 0
         self.file_name = dump_folder + f"/panda_{data_point_num}.npy"
 

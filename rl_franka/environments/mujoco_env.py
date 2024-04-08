@@ -24,6 +24,7 @@ class MujocoEnv(BaseEnv):
         obs = self.get_obs()
         reward = self.reward_func(self.data)
         done = self._is_done()
+        self.sync()
         return obs, reward, done, {}
 
     def render(self):

@@ -6,37 +6,13 @@ class REINFORCE(BaseAlgorithm):
         self.optimizer = optimizer
         self.gamma = gamma
 
-    def train(self, env, policy, num_episodes, num_steps):
-        for episode in range(num_episodes):
-            obs = env.reset()
-            episode_rewards = []
-            episode_logprobs = []
-            done = False
-
-            for step in range(num_steps):
-                action_probs = policy(obs)
-                action = torch.distributions.Categorical(action_probs).sample()
-                log_prob = torch.distributions.Categorical(action_probs).log_prob(action)
-                obs, reward, _, _ = env.step(action.item())
-                episode_rewards.append(reward)
-                episode_logprobs.append(log_prob)
-
-                if len(episode_rewards) % 100 == 0:
-                    print(f"Episode {episode}: Step {step}: Reward = {sum(episode_rewards):.2f}")
-            
-            returns = REINFORCE._compute_returns(episode_rewards)
-            loss = REINFORCE._compute_loss(episode_logprobs, returns)
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
-
     def evaluate(self, env, policy, num_episodes):
         total_rewards = []
         for episode in range(num_episodes):
             obs = env.reset()
             episode_reward = 0
             done = False
-            while not done:
+            while not done: 
                 action_probs = policy(obs)
                 action = torch.argmax(action_probs)
                 obs, reward, done, _ = env.step(action.item())

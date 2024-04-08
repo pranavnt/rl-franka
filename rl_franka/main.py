@@ -22,8 +22,6 @@ def reinforce_main():
 
     lr_scheduler = LinearScheduler(start_value=0.001, end_value=0.0001, num_steps=1000)
 
-    algo = REINFORCE(optimizer=optimizer)
-
     num_episodes = 1000
     num_steps = 30000
 
@@ -44,8 +42,7 @@ def reinforce_main():
             episode_logprobs.append(logprobs)
 
             if (step + 1) % 1000 == 0 or step == num_steps - 1:  
-                returns = REINFORCE._compute_returns(episode_rewards, 0.9999)
-                loss = REINFORCE._compute_loss(episode_logprobs, returns).sum()
+                loss = REINFORCE.calculate_loss(episode_logprobs, episode_rewards)
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
@@ -96,11 +93,11 @@ def behavior_cloning_main(data_dir="./data"):
             optimizer.step()
         print(f"Epoch {epoch + 1} loss: {loss.item()}")
 
-def ppo_main():
-    env = MujocoEnv(model_path="./mujoco_mengaerie/franka_emika_panda/scene.xml", reward_func=distance_reward, render=True)
+# def ppo_main():
+#     env = MujocoEnv(model_path="./mujoco_mengaerie/franka_emika_panda/scene.xml", reward_func=distance_reward, render=True)
 
-    algo = PPO(optimizer=optimizer)
+#     algo = PPO(optimizer=optimizer)
 
 if __name__ == "__main__":
-    behavior_cloning_main()
+    reinforce_main()
 
